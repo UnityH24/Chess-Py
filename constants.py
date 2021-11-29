@@ -1,0 +1,15 @@
+
+startFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+FILES = RANKS = 8
+SQUARES = FILES * RANKS
+
+
+PAWN = 1
+KNIGHT = 2
+BISHOP = 3
+ROOK = 4
+QUEEN = 5
+KING = 6
+
+WHITE = 8
+BLACK = 16
