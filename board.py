@@ -3,12 +3,12 @@ from constants import *
 class Board:
 
     def __init__(self, fen=startFEN):
-        self.pos, self.currColor, self.castleRights, self.enPassantSquare, self.fiftyPlyCounter, self.moveCounter = self.parseFen(fen)
+        self.board, self.currColor, self.castleRights, self.enPassantSquare, self.fiftyPlyCounter, self.moveCounter = self.parseFen(fen)
 
     def parseFen(self, fen):
-        pos, currColor, castleRights, enPassantSquare, fiftyPlyCounter, moveCounter = fen.split(' ')
+        board, currColor, castleRights, enPassantSquare, fiftyPlyCounter, moveCounter = fen.split(' ')
 
-        pos = self.translateToInternalState(pos)
+        board = self.translateToInternalState(board)
         currColor = WHITE if currColor == 'w' else BLACK
         castleRights = self.parseCastleRights(castleRights)
         enPassantSquare = self.indexOfSquare(enPassantSquare)
@@ -16,49 +16,49 @@ class Board:
         moveCounter = int(moveCounter)
 
 
-        return pos, currColor, castleRights, enPassantSquare, fiftyPlyCounter, moveCounter
+        return board, currColor, castleRights, enPassantSquare, fiftyPlyCounter, moveCounter
 
     # Get the index 0-63 of the square given in chess notation
     # If given - return None
     # e.g e2 -> 42
     def indexOfSquare(self, sqr):
-        return None if sqr == '-' else (ord(sqr[0]) - 97) * 8 + int(sqr[1])
+        return None if sqr == '-' else ord(sqr[0]) - 97 + (RANKS - int(sqr[1])) * 8
 
     # Translate a FEN position to an array of pieces
     def translateToInternalState(self, pos):
-        state = []
+        board = []
         for p in pos:
             if p.isdigit():
                 for i in range(int(p)):
-                    state.append(0)
+                    board.append(0)
             else:
                 c = p.lower()
                 color = WHITE if p.isupper() else BLACK
 
                 if c == 'p':
-                    state.append(PAWN | color)
+                    board.append(PAWN | color)
 
                 elif c == 'n':
-                    state.append(KNIGHT | color)
+                    board.append(KNIGHT | color)
 
                 elif c == 'b':
-                    state.append(BISHOP | color)
+                    board.append(BISHOP | color)
         
                 elif c == 'r':
-                    state.append(ROOK | color)
+                    board.append(ROOK | color)
         
                 elif c == 'q':
-                    state.append(QUEEN | color)
+                    board.append(QUEEN | color)
         
                 elif c == 'k':
-                    state.append(KING |color)
+                    board.append(KING |color)
 
-        return state
+        return board
 
     # Get the notational letter of a piece
     def letter(self, piece):
         if piece == 0:
-            return ' '
+            return '0'
 
         else:
             b = format(piece, "05b")
@@ -89,6 +89,19 @@ class Board:
         return 'K' in s, 'Q' in s, 'k' in s, 'q' in s
         
     def printState(self):
-        for i, piece in enumerate(self.pos):
+        for i, piece in enumerate(self.board):
             print(self.letter(piece), end=('\n' if (i + 1) % RANKS == 0 else ' '))
+
+    def validateMove(self, move):
+        return True
+
+    def makeMove(self, move, inSearch=False):
+        if not self.validateMove(move):
+            return -1
+
+        startSquare = self.indexOfSquare(move.startSquare)
+        targetSquare = self.indexOfSquare(move.targetSquare)
+
+        self.board[startSquare], self.board[targetSquare] = 0, self.board[startSquare]
+        return 1
 
